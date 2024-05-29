@@ -1,0 +1,117 @@
+const TonWeb = require('tonweb');
+const { Address } = TonWeb.utils;
+const fs = require('fs');
+const ton = require('ton');
+
+// Testnet endpoint
+const endpoint = 'https://testnet.toncenter.com/api/v2/jsonRPC';
+const tonweb = new TonWeb(new TonWeb.HttpProvider(endpoint));
+
+const pumpNftAddress = new Address('EQBWkskoePgPQoxsaxiTm5x3G9A7XaGjWw-Nfhz0ot8Bhh-r'); // Replace with your contract address
+const contractABI = JSON.parse(fs.readFileSync('./PumpNftAbi.json', 'utf-8'));
+
+async function getNftMetadata() {
+    try {
+        const result = await tonweb.provider.send('runGetMethod', {
+            address: pumpNftAddress.toString(true, true, true), 
+            method: 'getNftMetadata',
+            stack: []
+        });
+
+        if (result && result.stack && result.stack.length > 0) {
+            const metadataCell = result.stack[0][1];
+            if (metadataCell.bytes) {
+                const metadata = Buffer.from(metadataCell.bytes, 'base64').toString('utf-8');
+                const regex = /(https?:\/\/[^\s]+\.json)/;
+                const match = metadata.match(regex);
+                if (match && match.length > 0) {
+                    const url = match[0];
+                    console.log('NFT Metadata URL:', url);
+                } else {
+                    console.log('No URL found in metadata.');
+                }
+            } else {
+                console.log('No metadata found.');
+            }
+        } else {
+            console.log('No metadata found.');
+        }
+    } catch (error) {
+        console.error('Error calling getNftMetadata:', error);
+    }
+}
+
+async function getTotalSupply() {
+    try {
+        const result = await tonweb.provider.send('runGetMethod', {
+            address: pumpNftAddress.toString(true, true, true), 
+            method: 'getTotalSupply',
+            stack: []
+        });
+
+        if (result && result.stack && result.stack.length > 0) {
+            const metadataCell = result.stack[0][1];
+            if (metadataCell.bytes) {
+                const totalSupply = Buffer.from(metadataCell.bytes, 'base64').toString('utf-8');
+                console.log('Total Supply:', totalSupply);
+
+            } else {
+                console.log('No total supply found.');
+            }
+        } else {
+            console.log('No total supply found.');
+        }
+    } catch (error) {
+        console.error('Error calling total supply:', error);
+    }
+}
+
+async function getContractBalance() {
+    try {
+        const result = await tonweb.provider.send('runGetMethod', {
+            address: pumpNftAddress.toString(true, true, true), 
+            method: 'getContractBalance',
+            stack: []
+        });
+
+        if (result && result.stack && result.stack.length > 0) {
+            const metadataCell = result.stack[0][1];
+            if (metadataCell.bytes) {
+                const balance = Buffer.from(metadataCell.bytes, 'base64').toString('utf-8');
+                console.log('Contract Balance:', balance);
+            } else {
+                console.log('No total contract balance.');
+            }
+        } else {
+            console.log('No total contract balance');
+        }
+    } catch (error) {
+        console.error('Error calling total supply:', error);
+    }
+}
+
+async function checkContract() {
+    try {
+        const state = await tonweb.provider.send('getAddressInformation', {
+            address: pumpNftAddress.toString(true, true, true)
+        });
+
+        console.log('Contract State:', state);
+    } catch (error) {
+        console.error('Error getting contract state:', error);
+    }
+}
+
+async function mintNFT(receiver, quantity) {
+    try {
+        console.log('Mint function called successfully:');
+    } catch (error) {
+        console.error('Error calling mint function:', error);
+    }
+}
+
+// mintNFT('UQBQTIPWlbTRjoaB5AqppwptZExwc4epJiFuMF_2aTDemfXN', 2);
+// checkContract();
+getNftMetadata();
+getTotalSupply();
+getContractBalance();
